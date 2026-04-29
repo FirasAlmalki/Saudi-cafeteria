@@ -8,20 +8,20 @@ export interface Branch {
   vicinity: string;
 }
 
-// Known branches of كافتيريا السعودي (Saudi Sandwich) — used as fallback
+// Branches extracted from Google Maps search results — Mecca-focused chain
 const HARDCODED_BRANCHES: Branch[] = [
-  { id: "h1",  name: "كافتيريا السعودي — الرياض (العليا)",    lat: 24.6972, lng: 46.6833, vicinity: "شارع العليا، الرياض" },
-  { id: "h2",  name: "كافتيريا السعودي — الرياض (البطحاء)",   lat: 24.6860, lng: 46.7094, vicinity: "البطحاء، الرياض" },
-  { id: "h3",  name: "كافتيريا السعودي — الرياض (المعذر)",    lat: 24.7305, lng: 46.7561, vicinity: "المعذر، الرياض" },
-  { id: "h4",  name: "كافتيريا السعودي — جدة (البلد)",        lat: 21.4858, lng: 39.1925, vicinity: "البلد، جدة" },
-  { id: "h5",  name: "كافتيريا السعودي — جدة (الروضة)",       lat: 21.5433, lng: 39.1728, vicinity: "الروضة، جدة" },
-  { id: "h6",  name: "كافتيريا السعودي — مكة المكرمة",        lat: 21.3891, lng: 39.8579, vicinity: "مكة المكرمة" },
-  { id: "h7",  name: "كافتيريا السعودي — المدينة المنورة",    lat: 24.4672, lng: 39.6150, vicinity: "المدينة المنورة" },
-  { id: "h8",  name: "كافتيريا السعودي — الدمام",             lat: 26.4207, lng: 50.0888, vicinity: "الدمام، المنطقة الشرقية" },
-  { id: "h9",  name: "كافتيريا السعودي — الخبر",              lat: 26.2172, lng: 50.1971, vicinity: "الخبر، المنطقة الشرقية" },
-  { id: "h10", name: "كافتيريا السعودي — الطائف",             lat: 21.2703, lng: 40.4158, vicinity: "الطائف" },
-  { id: "h11", name: "كافتيريا السعودي — أبها",               lat: 18.2164, lng: 42.5053, vicinity: "أبها، عسير" },
-  { id: "h12", name: "كافتيريا السعودي — تبوك",               lat: 28.3998, lng: 36.5709, vicinity: "تبوك" },
+  { id: "h1",  name: "كافتيريا السعودي",         lat: 21.4411, lng: 39.8892, vicinity: "طريق الدائري الثالث، مكة المكرمة" },
+  { id: "h2",  name: "كافترياوبروست السعودي",     lat: 21.4284, lng: 39.8560, vicinity: "شارع ثوبان النبوي، مكة المكرمة" },
+  { id: "h3",  name: "كافتيريا السعودي",         lat: 21.4302, lng: 39.8580, vicinity: "الشوقية، مكة المكرمة" },
+  { id: "h4",  name: "كفتريا السعودي",           lat: 21.4267, lng: 39.8325, vicinity: "شارع أم المؤمنين أم سلمة، مكة المكرمة" },
+  { id: "h5",  name: "كافتيريا السعودي",         lat: 21.3883, lng: 39.8500, vicinity: "طريق جبل ثور، مكة المكرمة" },
+  { id: "h6",  name: "كافتيريا سعودي",           lat: 21.4011, lng: 39.8811, vicinity: "مكة المكرمة" },
+  { id: "h7",  name: "كافتيريا السعودي",         lat: 21.4150, lng: 39.8690, vicinity: "مكة المكرمة" },
+  { id: "h8",  name: "كفتيريا السعودي",          lat: 21.3950, lng: 39.8730, vicinity: "منطقة الحج، مكة المكرمة" },
+  { id: "h9",  name: "كافتيريا السعودي",         lat: 21.4584, lng: 39.8619, vicinity: "حي جبل النور، مكة المكرمة" },
+  { id: "h10", name: "كافتيريا السعودي الشرائع", lat: 21.4693, lng: 39.8052, vicinity: "الشرائع، مكة المكرمة" },
+  { id: "h11", name: "كافتيريا سعودية",          lat: 21.4178, lng: 39.8264, vicinity: "مكة المكرمة" },
+  { id: "h12", name: "Al Qurayyat Cafeteria",    lat: 31.3329, lng: 37.3425, vicinity: "القريات" },
 ];
 
 const OVERPASS_MIRRORS = [
@@ -64,10 +64,7 @@ async function tryOverpass(): Promise<Branch[]> {
           if (!lat || !lng) return null;
           return {
             id: String(el.id),
-            name:
-              el.tags?.["name:ar"] ??
-              el.tags?.name ??
-              "كافتيريا السعودي",
+            name: el.tags?.["name:ar"] ?? el.tags?.name ?? "كافتيريا السعودي",
             lat,
             lng,
             vicinity:
@@ -89,7 +86,6 @@ async function tryOverpass(): Promise<Branch[]> {
 
 export async function GET(_req: NextRequest) {
   const osm = await tryOverpass();
-  // Merge OSM results with hardcoded, deduplicate by proximity (~500m)
   const merged = [...osm];
   for (const hb of HARDCODED_BRANCHES) {
     const duplicate = osm.some(
